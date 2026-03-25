@@ -13,8 +13,8 @@ const connectDB = require("./config/db");
 const categoryRoutes = require("./routes/categoryRoutes");
 const authRoutes = require("./routes/authRoutes");
 
-const authMiddleware = require("./middlewares/authMiddleware");
-const roleMiddleware = require("./middlewares/roleMiddleware");
+const { authMiddleware } = require("./middlewares/authMiddleware");
+const { roleMiddleware } = require("./middlewares/roleMiddleware");
 
 const app = express();
 const server = http.createServer(app);
@@ -59,11 +59,11 @@ app.get("/api/protected", authMiddleware, (req, res) => {
   res.json({ msg: "You are authorized", user: req.user });
 });
 
-app.get("/api/admin", authMiddleware, roleMiddleware(["admin"]), (req, res) => {
+app.get("/api/admin", authMiddleware, roleMiddleware("admin"), (req, res) => {
   res.json({ msg: "Welcome Admin" });
 });
 
-app.get("/api/manager", authMiddleware, roleMiddleware(["admin", "manager"]), (req, res) => {
+app.get("/api/manager", authMiddleware, roleMiddleware("admin", "manager"), (req, res) => {
   res.json({ msg: "Welcome Manager" });
 });
 
