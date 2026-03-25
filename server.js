@@ -7,6 +7,8 @@ require("dotenv").config();
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
+const menuRoutes = require("./routes/menuRoutes");
+
 
 const connectDB = require("./config/db");
 
@@ -33,6 +35,7 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
 });
+app.use("/api/menu", menuRoutes);
 app.use(limiter);
 
 // ✅ Middlewares
