@@ -1,23 +1,37 @@
-// src/controllers/categoryController.js
+//controllers/categoryController.js
+
 const Category = require("../models/Category");
 const asyncHandler = require("../utils/asyncHandler");
-const { createCategorySchema, updateCategorySchema } = require("../validators/categoryValidator");
+const {
+  createCategorySchema,
+  updateCategorySchema,
+} = require("../validators/categoryValidator");
 
 // ==========================
 // CREATE CATEGORY
 // ==========================
 exports.createCategory = asyncHandler(async (req, res) => {
   const { error, value } = createCategorySchema.validate(req.body);
-  if (error) return res.status(400).json({ success: false, message: error.details[0].message });
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
 
   const categoryExists = await Category.findOne({ name: value.name });
+
   if (categoryExists) {
-    return res.status(400).json({ success: false, message: "Category already exists" });
+    return res.status(400).json({
+      success: false,
+      message: "Category already exists",
+    });
   }
 
   const category = await Category.create({
     ...value,
-    createdBy: req.user._id, // track which user created
+    createdBy: req.user._id,
   });
 
   res.status(201).json({
@@ -28,11 +42,12 @@ exports.createCategory = asyncHandler(async (req, res) => {
 });
 
 // ==========================
-// GET ALL CATEGORIES (with pagination)
+// GET ALL CATEGORIES
 // ==========================
 exports.getCategories = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
+
   const skip = (page - 1) * limit;
 
   const categories = await Category.find({ isActive: true })
@@ -53,13 +68,16 @@ exports.getCategories = asyncHandler(async (req, res) => {
 });
 
 // ==========================
-// GET SINGLE CATEGORY
+// GET CATEGORY BY ID
 // ==========================
 exports.getCategoryById = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.params.id);
 
   if (!category || !category.isActive) {
-    return res.status(404).json({ success: false, message: "Category not found" });
+    return res.status(404).json({
+      success: false,
+      message: "Category not found",
+    });
   }
 
   res.status(200).json({
@@ -73,15 +91,28 @@ exports.getCategoryById = asyncHandler(async (req, res) => {
 // ==========================
 exports.updateCategory = asyncHandler(async (req, res) => {
   const { error, value } = updateCategorySchema.validate(req.body);
-  if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
-  const category = await Category.findByIdAndUpdate(req.params.id, value, {
-    new: true,
-    runValidators: true,
-  });
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+
+  const category = await Category.findByIdAndUpdate(
+    req.params.id,
+    value,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   if (!category || !category.isActive) {
-    return res.status(404).json({ success: false, message: "Category not found" });
+    return res.status(404).json({
+      success: false,
+      message: "Category not found",
+    });
   }
 
   res.status(200).json({
@@ -92,13 +123,16 @@ exports.updateCategory = asyncHandler(async (req, res) => {
 });
 
 // ==========================
-// DELETE CATEGORY (Soft Delete)
+// DELETE CATEGORY (SOFT DELETE)
 // ==========================
 exports.deleteCategory = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.params.id);
 
   if (!category || !category.isActive) {
-    return res.status(404).json({ success: false, message: "Category not found or already deactivated" });
+    return res.status(404).json({
+      success: false,
+      message: "Category not found or already deactivated",
+    });
   }
 
   category.isActive = false;
